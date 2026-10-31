@@ -1,0 +1,16 @@
+// [name, ISO code, dial code]. Flags are derived from the ISO code.
+const RAW = `Afghanistan,AF,93;Albania,AL,355;Algeria,DZ,213;Andorra,AD,376;Angola,AO,244;Argentina,AR,54;Armenia,AM,374;Australia,AU,61;Austria,AT,43;Azerbaijan,AZ,994;Bahrain,BH,973;Bangladesh,BD,880;Belarus,BY,375;Belgium,BE,32;Benin,BJ,229;Bolivia,BO,591;Bonaire, Sint Eustatius & Saba,BQ,599;Bosnia & Herzegovina,BA,387;Botswana,BW,267;Brazil,BR,55;British Virgin Islands,VG,1284;Brunei Darussalam,BN,673;Bulgaria,BG,359;Burkina Faso,BF,226;Burundi,BI,257;Cambodia,KH,855;Cameroon,CM,237;Canada,CA,1;Cape Verde,CV,238;Chad,TD,235;Chile,CL,56;China,CN,86;Colombia,CO,57;Congo (DRC),CD,243;Costa Rica,CR,506;Côte d'Ivoire,CI,225;Croatia,HR,385;Cuba,CU,53;Cyprus,CY,357;Czech Republic,CZ,420;Denmark,DK,45;Dominican Republic,DO,1809;Ecuador,EC,593;Egypt,EG,20;El Salvador,SV,503;Estonia,EE,372;Ethiopia,ET,251;Finland,FI,358;France,FR,33;Gabon,GA,241;Gambia,GM,220;Georgia,GE,995;Germany,DE,49;Ghana,GH,233;Greece,GR,30;Guatemala,GT,502;Guinea,GN,224;Haiti,HT,509;Honduras,HN,504;Hong Kong,HK,852;Hungary,HU,36;Iceland,IS,354;India,IN,91;Indonesia,ID,62;Iran,IR,98;Iraq,IQ,964;Ireland,IE,353;Israel,IL,972;Italy,IT,39;Jamaica,JM,1876;Japan,JP,81;Jordan,JO,962;Kazakhstan,KZ,7;Kenya,KE,254;Kuwait,KW,965;Kyrgyzstan,KG,996;Laos,LA,856;Latvia,LV,371;Lebanon,LB,961;Liberia,LR,231;Libya,LY,218;Lithuania,LT,370;Luxembourg,LU,352;Madagascar,MG,261;Malawi,MW,265;Malaysia,MY,60;Mali,ML,223;Malta,MT,356;Mauritius,MU,230;Mexico,MX,52;Moldova,MD,373;Monaco,MC,377;Mongolia,MN,976;Morocco,MA,212;Mozambique,MZ,258;Myanmar,MM,95;Namibia,NA,264;Nepal,NP,977;Netherlands,NL,31;New Zealand,NZ,64;Nicaragua,NI,505;Niger,NE,227;Nigeria,NG,234;North Macedonia,MK,389;Norway,NO,47;Oman,OM,968;Pakistan,PK,92;Palestine,PS,970;Panama,PA,507;Paraguay,PY,595;Peru,PE,51;Philippines,PH,63;Poland,PL,48;Portugal,PT,351;Qatar,QA,974;Romania,RO,40;Russian Federation,RU,7;Rwanda,RW,250;Saudi Arabia,SA,966;Senegal,SN,221;Serbia,RS,381;Sierra Leone,SL,232;Singapore,SG,65;Slovakia,SK,421;Slovenia,SI,386;Somalia,SO,252;South Africa,ZA,27;South Korea,KR,82;South Sudan,SS,211;Spain,ES,34;Sri Lanka,LK,94;Sudan,SD,249;Sweden,SE,46;Switzerland,CH,41;Syria,SY,963;Taiwan,TW,886;Tajikistan,TJ,992;Tanzania,TZ,255;Thailand,TH,66;Togo,TG,228;Trinidad & Tobago,TT,1868;Tunisia,TN,216;Turkey,TR,90;Turkmenistan,TM,993;Uganda,UG,256;Ukraine,UA,380;United Arab Emirates,AE,971;United Kingdom,GB,44;United States,US,1;Uruguay,UY,598;Uzbekistan,UZ,998;Venezuela,VE,58;Vietnam,VN,84;Yemen,YE,967;Zambia,ZM,260;Zimbabwe,ZW,263`;
+
+// The one entry containing commas ("Bonaire, Sint Eustatius & Saba") is split on ';' first, then on the last two commas.
+export const COUNTRIES = RAW.split(';').map(s => {
+  const p = s.split(',');
+  const dial = p.pop(), iso = p.pop();
+  return { name: p.join(',').trim(), iso, dial };
+});
+export const flag = iso => String.fromCodePoint(...[...iso].map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
+export const findByPhone = v => {
+  const d = v.replace(/[^\d]/g, '');
+  let best = null;
+  for (const c of COUNTRIES) if (d.startsWith(c.dial) && (!best || c.dial.length > best.dial.length || (c.dial.length === best.dial.length && (c.iso === 'US' || c.iso === 'RU')))) best = c;
+  return best;
+};
